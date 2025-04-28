@@ -11,17 +11,17 @@ const CloudTv = () => {
     const navigate = useNavigate()
     const { currentUser } = useContext(CloudContext)
     
-    console.log(currentUser)
+    // console.log(currentUser)
 
-    useEffect(() => {
-      const isUserLoaded = () => {
-        if (!currentUser) {
-          navigate('/user')
-        }
-      }
+    // useEffect(() => {
+    //   const isUserLoaded = () => {
+    //     if (!currentUser) {
+    //       navigate('/user')
+    //     }
+    //   }
 
-      isUserLoaded()
-    }, [])
+    //   isUserLoaded()
+    // }, [])
 
     return (
         <div id="home-container">
