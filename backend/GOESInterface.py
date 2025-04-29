@@ -13,10 +13,9 @@ class GOES_Interface():
         try:
             shutil.rmtree(self.frontend_dest)
             shutil.copytree(self.backend_dest, self.frontend_dest)
-            print('yup')
+            print('OK')
         except Exception as e:
             print(e)
-            print('nope')
 
     @classmethod
     def reseed_database(self):

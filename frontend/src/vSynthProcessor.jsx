@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import vSynthLfo from "./vSynthLfo";
 import CloudContext from "./CloudContext";
+import MidiFighterTwister from "./MidiFighterTwister";
 
 // https://www.phpied.com/pixel-manipulation-in-canvas/
 // https://stackoverflow.com/questions/51294998/convolve-kernal-matrics-in-javascript-for-image-filter-in-html5canvas
@@ -25,6 +26,10 @@ const vSynthProcessor = () => {
       willReadFrequently: true, 
       desynchronized: false 
     })
+    
+    // // // // // // // // // MIDI FIGHTER TWISTER // // // // // // // // // // // // // // // 
+    const MFT = new MidiFighterTwister()
+    let paramSliderArray;
 
     // // // // // // // // // // // // // // PARAMETERS // // // // // // // // // // // // 
       // this seemed preferable over managing parameters VIA array/obj to avoid any unnecessary additional steps in memory considering the rate of <canvas> animations?
@@ -40,37 +45,37 @@ const vSynthProcessor = () => {
         // p9Val  :  INVERT B
         // p10Val :  WIDTHGLITCH
 
-    const speedSlider = document.getElementById('param-speed')
-    const fpsSlider = document.getElementById('param-fps')
-    const cloudSlider = document.getElementById('param-cloud')
-    const resSlider = document.getElementById('param-resolution')
-
-    video.playbackRate = 1
-
-    speedSlider.addEventListener('input', (evt) => {
-      video.playbackRate = (evt.target.value / 2.5) 
-    })
-
-    cloudSlider.addEventListener('input', (evt) => {
-      video.src = `/cloud-set/${clouds[evt.target.value]}`
-      video.play()
-      console.log(clouds[evt.target.value])
-    })
-
-    resSlider.addEventListener('input', (evt) => {
-      res = evt.target.value
-      DOWNSAMPLE()
-    })
-
-    fpsSlider.addEventListener('input', (evt) => {
-      fps = evt.target.value 
-
-      window.clearInterval(canvasInterval)
-      canvasInterval = window.setInterval(() => {
-        draw() 
-      }, fps);
-    })
-
+        const speedSlider = document.getElementById('param-speed')
+        const fpsSlider = document.getElementById('param-fps')
+        const cloudSlider = document.getElementById('param-cloud')
+        const resSlider = document.getElementById('param-resolution')
+        
+        video.playbackRate = 1
+        
+        speedSlider.addEventListener('input', (evt) => {
+          video.playbackRate = (evt.target.value / 2.5) 
+        })
+        
+        cloudSlider.addEventListener('input', (evt) => {
+          video.src = `/cloud-set/${clouds[evt.target.value]}`
+          video.play()
+          console.log(clouds[evt.target.value])
+        })
+        
+        resSlider.addEventListener('input', (evt) => {
+          res = evt.target.value
+          DOWNSAMPLE()
+        })
+        
+        fpsSlider.addEventListener('input', (evt) => {
+          fps = evt.target.value 
+          
+          window.clearInterval(canvasInterval)
+          canvasInterval = window.setInterval(() => {
+            draw() 
+          }, fps);
+        })
+        
     let p1Val=8, p2Val=0, p3Val=0, p4Val=25, p5Val=0, p6Val=0, p7Val=0, p8Val=0, p9Val=0, p10Val=1 
     
     const param1 = document.getElementById('param-p1')
@@ -95,35 +100,51 @@ const vSynthProcessor = () => {
       p3Val = param3.value
       console.log(p3Val)
     })
-    param4.addEventListener('input', () => {
+    param4.addEventListener('change', () => {
       p4Val = param4.value
       console.log(p4Val)
     })
-    param5.addEventListener('input', () => {
+    param5.addEventListener('change', () => {
       p5Val = param5.value * 100
       console.log(p5Val)
     })
-    param6.addEventListener('input', () => {
+    param6.addEventListener('change', () => {
       p6Val = param6.value
       console.log(p6Val)
     })
-    param7.addEventListener('input', () => {
+    param7.addEventListener('change', () => {
       p7Val = param7.value
       console.log(p7Val)
     })
-    param8.addEventListener('input', () => {
+    param8.addEventListener('change', () => {
       p8Val = param8.value
       console.log(p8Val)
     })
-    param9.addEventListener('input', () => {
+    param9.addEventListener('change', () => {
       p9Val = param9.value
       console.log(p9Val)
     })
-    param10.addEventListener('input', () => {
+    param10.addEventListener('change', () => {
       p10Val = param10.value
       console.log(p10Val)
     })
 
+    // MFT AGAIN 
+    // paramSliderArray = [p1Val, p2Val, p3Val, p4Val, p5Val, p6Val, p7Val, p8Val, p9Val, p10Val]
+    const MFTupdate = () => {
+      p1Val = MFT.inputArray[0]
+      p2Val = MFT.inputArray[1]
+      p3Val = MFT.inputArray[2]
+      p4Val = MFT.inputArray[3]
+      p5Val = MFT.inputArray[4]
+      p6Val = MFT.inputArray[5]
+      p7Val = MFT.inputArray[6]
+      p8Val = MFT.inputArray[7]
+      
+    }
+    MFT.setUpdate(MFTupdate)
+    // MFT.setSliders(paramSliderArray)
+    
     // // // // // // // // // EFFECTS // // // // // // // // // // // // // // // 
     const drawOriginal = () => {
       ctx.drawImage(video, 0, 0, ctx.canvas.width,ctx.canvas.height);
