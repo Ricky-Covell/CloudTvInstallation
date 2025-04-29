@@ -57,7 +57,9 @@ const VideoSynthNav = () => {
           {/* <h3>Video Synth</h3> */}
           {/* <h4>p1</h4>           */}
           <input id="param-p1" class='vSynth-slider' type="range" min="4" max="24" defaultValue='8' step='.1' name="p1" />
-          {/* <h4>p2</h4> */}
+          <h4>p2</h4>
+
+          
           <input id="param-p2" class='vSynth-slider' type="range" min="0" max="100" defaultValue='0' step='0.17' name="p2" />
           {/* <h4>p3</h4> */}
           <input id="param-p3" class='vSynth-slider' type="range" min="0" max="3000" step="3.79" defaultValue='0' name="p3" />

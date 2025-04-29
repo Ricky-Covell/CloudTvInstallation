@@ -131,16 +131,38 @@ const vSynthProcessor = () => {
 
     // MFT AGAIN 
     // paramSliderArray = [p1Val, p2Val, p3Val, p4Val, p5Val, p6Val, p7Val, p8Val, p9Val, p10Val]
+    const MFTtoRange = (val, inMin, inMax, outMin, outMax) => {
+      return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+    }
     const MFTupdate = () => {
-      p1Val = MFT.inputArray[0]
-      p2Val = MFT.inputArray[1]
-      p3Val = MFT.inputArray[2]
-      p4Val = MFT.inputArray[3]
-      p5Val = MFT.inputArray[4]
-      p6Val = MFT.inputArray[5]
-      p7Val = MFT.inputArray[6]
-      p8Val = MFT.inputArray[7]
       
+      p2Val  = MFTtoRange(MFT.inputArray[0], 0, 127, 0, 101)
+      p3Val  = MFTtoRange(MFT.inputArray[1], 0, 127, 0, 3000)
+      p4Val  = MFTtoRange(MFT.inputArray[2], 0, 127, -50, 100 )
+      p5Val  = MFTtoRange(MFT.inputArray[3], 0, 127, -50, 50)
+      p6Val  = MFTtoRange(MFT.inputArray[4], 0, 127, 0, 10)
+      p7Val  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 1)
+      p8Val  = MFTtoRange(MFT.inputArray[6], 0, 127, 0, 1)
+      p9Val  = MFTtoRange(MFT.inputArray[7], 0, 127, 0, 1)
+      p10Val = MFTtoRange(MFT.inputArray[8], 0, 127, 1, 10)
+      
+      video.playbackRate = MFTtoRange(MFT.inputArray[12], 0, 127, 0, 10)
+
+      // if (video.src != `/cloud-set/${clouds[Math.round(MFTtoRange(MFT.inputArray[15], 0, 127, 0, 15))]}`) {
+      //   video.src =     `/cloud-set/${clouds[Math.round(MFTtoRange(MFT.inputArray[15], 0, 127, 0, 15))]}`
+      //   // video.play()
+      // }
+      
+      
+      // res = evt.target.value
+      // DOWNSAMPLE()
+      
+      // fps = MFTtoRange(MFT.inputArray[13], 0, 127, 30, 300)
+      // window.clearInterval(canvasInterval)
+      // canvasInterval = window.setInterval(() => {
+      //   draw() 
+      // }, fps);
+
     }
     MFT.setUpdate(MFTupdate)
     // MFT.setSliders(paramSliderArray)
