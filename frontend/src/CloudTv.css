@@ -72,15 +72,15 @@ body {
   border: 1px solid rgb(0, 255, 179);
   margin: 6% 0;
   /* border-radius: 3%; */
-  width:  100vw;   
+  width:  70vw;   
   /* height: 100vh; */
 }
 
                       /* vSynth Params */
 
 #vSynth-container {
-  width: 100vw;
-  height: 100vh;
+  width: 0vw;
+  height: 0vh;
   /* border: var(--containerBorderColor) solid 1px; */
   /* background-color: var(--containerBgColor); */
   /* border-radius: 3%; */

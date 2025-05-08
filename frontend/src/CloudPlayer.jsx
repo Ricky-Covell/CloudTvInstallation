@@ -18,9 +18,10 @@ const CloudPlayer = () => {
               autoPlay 
               muted 
               loop    
+              play
               width={4096}
               height={2160}  
-              src={randomVidOnLoad}            
+              src={randomVidOnLoad}              
             >
               {/* { clouds.map(cloud => {
                 return ( <source src='tbd.mp4' type="video/mp4" /> )                 

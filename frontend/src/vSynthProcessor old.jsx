@@ -1,13 +1,10 @@
 import React, { useState, useEffect, useContext } from "react";
-
 import vSynthLfo from "./vSynthLfo";
 import CloudContext from "./CloudContext";
 import MidiFighterTwister from "./MidiFighterTwister";
 
-//        PRISM I | PRISM II | BRIGHTNESS | CONTRAST
-//        CONV I  | R INV    | G INV      | B INV   
-//        W Pinch | W Scan   |            |    
-//        SPEED   |          |            | VOLUME    
+// https://www.phpied.com/pixel-manipulation-in-canvas/
+// https://stackoverflow.com/questions/51294998/convolve-kernal-matrics-in-javascript-for-image-filter-in-html5canvas
 
 const vSynthProcessor = () => {
   // const isLoaded = false
@@ -35,6 +32,18 @@ const vSynthProcessor = () => {
     let paramSliderArray;
 
     // // // // // // // // // // // // // // PARAMETERS // // // // // // // // // // // // 
+      // this seemed preferable over managing parameters VIA array/obj to avoid any unnecessary additional steps in memory considering the rate of <canvas> animations?
+      // PARAM LAYOUT
+        // p1Val  :  DOWNSAMPLE
+        // p2Val  :  z
+        // p3Val  :  PRISM
+        // p4Val  :  z
+        // p5Val  :  z
+        // p6Val  :  z
+        // p7Val  :  INVERT R
+        // p8Val  :  INVERT G
+        // p9Val  :  INVERT B
+        // p10Val :  WIDTHGLITCH
 
         const speedSlider = document.getElementById('param-speed')
         const fpsSlider = document.getElementById('param-fps')
@@ -67,7 +76,7 @@ const vSynthProcessor = () => {
           }, fps);
         })
         
-    let p1Val=8, p2Val=0, p3Val=0, p4Val=25, p5Val=0, p6Val=0, p7Val=0, p8Val=0, p9Val=0, p10Val=1, p11Val=1, p12Val=1, p13Val=1
+    let p1Val=8, p2Val=0, p3Val=0, p4Val=25, p5Val=0, p6Val=0, p7Val=0, p8Val=0, p9Val=0, p10Val=1 
     
     const param1 = document.getElementById('param-p1')
     const param2 = document.getElementById('param-p2')
@@ -126,18 +135,17 @@ const vSynthProcessor = () => {
       return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
     const MFTupdate = () => {
-    
-        p2Val  = MFTtoRange(MFT.inputArray[0], 0, 127, 0, 101)
-        p3Val  = MFTtoRange(MFT.inputArray[1], 0, 127, 0, 3000)
-        p4Val  = MFTtoRange(MFT.inputArray[2], 0, 127, -50, 100 )
-        p5Val  = MFTtoRange(MFT.inputArray[3], 0, 127, -50, 200)
-        p6Val  = MFTtoRange(MFT.inputArray[4], 0, 127, 0, 10)
-        p7Val  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 1)
-        p8Val  = MFTtoRange(MFT.inputArray[6], 0, 127, 0, 1)
-        p9Val  = MFTtoRange(MFT.inputArray[7], 0, 127, 0, 1)
-        p10Val = MFTtoRange(MFT.inputArray[8], 0, 127, 1, 10)
-        p11Val = MFTtoRange(MFT.inputArray[9], 0, 127, 0, 5)
-
+      
+      p2Val  = MFTtoRange(MFT.inputArray[0], 0, 127, 0, 101)
+      p3Val  = MFTtoRange(MFT.inputArray[1], 0, 127, 0, 3000)
+      p4Val  = MFTtoRange(MFT.inputArray[2], 0, 127, -50, 100 )
+      p5Val  = MFTtoRange(MFT.inputArray[3], 0, 127, -50, 200)
+      p6Val  = MFTtoRange(MFT.inputArray[4], 0, 127, 0, 10)
+      p7Val  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 1)
+      p8Val  = MFTtoRange(MFT.inputArray[6], 0, 127, 0, 1)
+      p9Val  = MFTtoRange(MFT.inputArray[7], 0, 127, 0, 1)
+      p10Val = MFTtoRange(MFT.inputArray[8], 0, 127, 1, 10)
+      
       video.playbackRate = MFTtoRange(MFT.inputArray[12], 0, 127, 0, 10)
 
       // if (video.src != `/cloud-set/${clouds[Math.round(MFTtoRange(MFT.inputArray[15], 0, 127, 0, 15))]}`) {
@@ -286,12 +294,6 @@ const vSynthProcessor = () => {
       return p10Val
     }
 
-    const HEIGHTGLITCH = () => {
-      // if (p9Val === 1) return  1
-
-      return p11Val
-    }
-
     const CONVOLUTION = (data, limit, w, h, kernel) => {
         if (p6Val == 0) return
 
@@ -372,7 +374,8 @@ const vSynthProcessor = () => {
     }
     // // // // // // // // // EXECUTE // // // // // // // // // // // // // // // 
     const draw = () => {
-      ctx.drawImage(video,HEIGHTGLITCH()*100,0,(ctx.canvas.width/WIDTHGLITCH() ),(ctx.canvas.height));
+      ctx.drawImage(video,0,0,(ctx.canvas.width/WIDTHGLITCH()),ctx.canvas.height);
+      // ctx.drawImage(video,0,0,ctx.canvas.width,ctx.canvas.height);
       let idata = ctx.getImageData(0,0,canvas.width, canvas.height);
       let data = idata.data;
       let w = idata.width;
