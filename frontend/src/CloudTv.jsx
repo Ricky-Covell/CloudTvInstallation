@@ -26,9 +26,9 @@ const CloudTv = () => {
     return (
         <div id="home-container">
             <div id="clouds-container">
-              { UserNav() }
+              {/* { UserNav() } */}
               { CloudPlayer() }
-              { VideoSynthNav() }              
+              {/* { VideoSynthNav() }               */}
               { vSynthProcessor() }
             </div>
           </div>

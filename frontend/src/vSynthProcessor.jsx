@@ -1,13 +1,20 @@
 import React, { useState, useEffect, useContext } from "react";
-
 import vSynthLfo from "./vSynthLfo";
 import CloudContext from "./CloudContext";
 import MidiFighterTwister from "./MidiFighterTwister";
+
+// MAY CHECKLIST
+  // Contrast/Brightness Foldover
+  // Convolution
+  // Prism1 update?
+  // colorInv to 2 knobs
 
 //        PRISM I | PRISM II | BRIGHTNESS | CONTRAST
 //        CONV I  | R INV    | G INV      | B INV   
 //        W Pinch | W Scan   |            |    
 //        SPEED   |          |            | VOLUME    
+
+
 
 const vSynthProcessor = () => {
   // const isLoaded = false
@@ -27,7 +34,7 @@ const vSynthProcessor = () => {
     const ctx = canvas.getContext('2d', { 
       alpha: false, 
       willReadFrequently: true, 
-      desynchronized: false 
+      desynchronized: true 
     })
     
     // // // // // // // // // MIDI FIGHTER TWISTER // // // // // // // // // // // // // // // 
@@ -43,100 +50,44 @@ const vSynthProcessor = () => {
         
         video.playbackRate = 1
         
-        speedSlider.addEventListener('input', (evt) => {
-          video.playbackRate = (evt.target.value / 2.5) 
-        })
-        
-        cloudSlider.addEventListener('input', (evt) => {
-          video.src = `/cloud-set/${clouds[evt.target.value]}`
-          video.play()
-          console.log(clouds[evt.target.value])
-        })
-        
-        resSlider.addEventListener('input', (evt) => {
-          res = evt.target.value
-          DOWNSAMPLE()
-        })
-        
-        fpsSlider.addEventListener('input', (evt) => {
-          fps = evt.target.value 
-          
-          window.clearInterval(canvasInterval)
-          canvasInterval = window.setInterval(() => {
-            draw() 
-          }, fps);
-        })
-        
-    let p1Val=8, p2Val=0, p3Val=0, p4Val=25, p5Val=0, p6Val=0, p7Val=0, p8Val=0, p9Val=0, p10Val=1, p11Val=1, p12Val=1, p13Val=1
-    
-    const param1 = document.getElementById('param-p1')
-    const param2 = document.getElementById('param-p2')
-    const param3 = document.getElementById('param-p3')
-    const param4 = document.getElementById('param-p4')
-    const param5 = document.getElementById('param-p5')
-    const param6 = document.getElementById('param-p6')
-    const param7 = document.getElementById('param-p7')
-    const param8 = document.getElementById('param-p8')
-    const param9 = document.getElementById('param-p9')
-    const param10 = document.getElementById('param-p10')
+    let prism1Val=0, 
+        prism2Val=0, 
+        brightVal=25, 
+        contrastVal=0, 
+        convVal=0, 
+        rInvVal=0, 
+        gInvVal=0, 
+        bInvVal=0, 
+        colorInv1Val=0,  
+        colorInv2Val=0,
+        colorInv3Val=0,
+        wPinchVal=1, 
+        wScanVal=1,
+        p12Val=1, 
+        p13Val=1
 
-    param1.addEventListener('change', () => {
-      p1Val = param1.value
-    })
-    param2.addEventListener('change', () => {
-      p2Val = param2.value
-      console.log(p2Val)
-    })
-    param3.addEventListener('change', () => {
-      p3Val = param3.value
-      console.log(p3Val)
-    })
-    param4.addEventListener('change', () => {
-      p4Val = param4.value
-      console.log(p4Val)
-    })
-    param5.addEventListener('change', () => {
-      p5Val = param5.value * 100
-      console.log(p5Val)
-    })
-    param6.addEventListener('change', () => {
-      p6Val = param6.value
-      console.log(p6Val)
-    })
-    param7.addEventListener('change', () => {
-      p7Val = param7.value
-      console.log(p7Val)
-    })
-    param8.addEventListener('change', () => {
-      p8Val = param8.value
-      console.log(p8Val)
-    })
-    param9.addEventListener('change', () => {
-      p9Val = param9.value
-      console.log(p9Val)
-    })
-    param10.addEventListener('change', () => {
-      p10Val = param10.value
-      console.log(p10Val)
-    })
 
     // MFT AGAIN 
-    // paramSliderArray = [p1Val, p2Val, p3Val, p4Val, p5Val, p6Val, p7Val, p8Val, p9Val, p10Val]
     const MFTtoRange = (val, inMin, inMax, outMin, outMax) => {
       return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
     const MFTupdate = () => {
     
-        p2Val  = MFTtoRange(MFT.inputArray[0], 0, 127, 0, 101)
-        p3Val  = MFTtoRange(MFT.inputArray[1], 0, 127, 0, 3000)
-        p4Val  = MFTtoRange(MFT.inputArray[2], 0, 127, -50, 100 )
-        p5Val  = MFTtoRange(MFT.inputArray[3], 0, 127, -50, 200)
-        p6Val  = MFTtoRange(MFT.inputArray[4], 0, 127, 0, 10)
-        p7Val  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 1)
-        p8Val  = MFTtoRange(MFT.inputArray[6], 0, 127, 0, 1)
-        p9Val  = MFTtoRange(MFT.inputArray[7], 0, 127, 0, 1)
-        p10Val = MFTtoRange(MFT.inputArray[8], 0, 127, 1, 10)
-        p11Val = MFTtoRange(MFT.inputArray[9], 0, 127, 0, 5)
+        brightVal  = MFTtoRange(MFT.inputArray[0], 0, 127, -50, 100 )
+        contrastVal  = MFTtoRange(MFT.inputArray[1], 0, 127, -50, 250)
+        rInvVal  = MFTtoRange(MFT.inputArray[2], 0, 127, 0, 2)
+        bInvVal  = MFTtoRange(MFT.inputArray[3], 0, 127, 0, 2)
+        // bInvVal  = MFTtoRange(MFT.inputArray[7], 0, 127, 0, 1)
+
+        convVal  = MFTtoRange(MFT.inputArray[4], 0, 127, 0, 10)
+        colorInv1Val  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 5)
+        colorInv2Val  = MFTtoRange(MFT.inputArray[6], 0, 127, 0, 5)
+        gInvVal  = MFTtoRange(MFT.inputArray[7], 0, 127, 0, 2)
+
+        wPinchVal = MFTtoRange(MFT.inputArray[8], 0, 127, 1, 10)
+        wScanVal = MFTtoRange(MFT.inputArray[9], 0, 127, 0, 5)
+        prism1Val  = MFTtoRange(MFT.inputArray[10], 0, 127, 0, 101)
+        prism2Val  = MFTtoRange(MFT.inputArray[11], 0, 127, 1, 300000)
 
       video.playbackRate = MFTtoRange(MFT.inputArray[12], 0, 127, 0, 10)
 
@@ -144,8 +95,7 @@ const vSynthProcessor = () => {
       //   video.src =     `/cloud-set/${clouds[Math.round(MFTtoRange(MFT.inputArray[15], 0, 127, 0, 15))]}`
       //   // video.play()
       // }
-      
-      
+    
       // res = evt.target.value
       // DOWNSAMPLE()
       
@@ -157,20 +107,19 @@ const vSynthProcessor = () => {
 
     }
     MFT.setUpdate(MFTupdate)
-    // MFT.setSliders(paramSliderArray)
     
-    // // // // // // // // // EFFECTS // // // // // // // // // // // // // // // 
+    // // // // // // // // // PROCESSORS // // // // // // // // // // // // // // // 
     const drawOriginal = () => {
       ctx.drawImage(video, 0, 0, ctx.canvas.width,ctx.canvas.height);
     }
 
     const BRIGHTNESS = (data, limit) => {
-      if (p4Val == 50) return
+      if (brightVal == 50) return
 
       for (let i = 0; i < limit; i+=4) {
-        data[i]   += ((255 * (p4Val / 100)) - 50);
-        data[i+1] += ((255 * (p4Val / 100)) - 50);
-        data[i+2] += ((255 * (p4Val / 100)) - 50);
+        data[i]   += ((255 * (brightVal / 100)) - 50);
+        data[i+1] += ((255 * (brightVal / 100)) - 50);
+        data[i+2] += ((255 * (brightVal / 100)) - 50);
       }
     }
 
@@ -180,62 +129,63 @@ const vSynthProcessor = () => {
       // if (p5Val == 0) return
 
       for (var i = 0; i < limit; i+= 4) { 
-        data[i+0] = Math.ceil(259.0 * (p5Val + 255.0) / (255.0 * (259.0 - p5Val)) * (data[i+0] - 128.0) + 128.0)
-        data[i+1] = Math.ceil(259.0 * (p5Val + 255.0) / (255.0 * (259.0 - p5Val)) * (data[i+1] - 128.0) + 128.0)
-        data[i+2] = Math.ceil(259.0 * (p5Val + 255.0) / (255.0 * (259.0 - p5Val)) * (data[i+2] - 128.0) + 128.0) 
+        data[i+0] = Math.ceil(259.0 * (contrastVal + 255.0) / (255.0 * (259.0 - contrastVal)) * (data[i+0] - 128.0) + 128.0)
+        data[i+1] = Math.ceil(259.0 * (contrastVal + 255.0) / (255.0 * (259.0 - contrastVal)) * (data[i+1] - 128.0) + 128.0)
+        data[i+2] = Math.ceil(259.0 * (contrastVal + 255.0) / (255.0 * (259.0 - contrastVal)) * (data[i+2] - 128.0) + 128.0) 
         // data[i+3] = Math.ceil(259.0 * (p5Val + 255.0) / (255.0 * (259.0 - p5Val)) * (data[i+3] - 128.0) + 128.0)
       }
     }
 
     const PRISM1 = (data, limit) => {
-      if (p2Val == 0 && p3Val == 0) return
+      if (prism1Val == 0 && prism2Val == 0) return
       
-      if (p3Val != 0) {
+      if (prism2Val != 0) {
         for (let i = 0; i < limit; i+=4) {
-          data[i+0] =  data[(Math.round(i+0+(p3Val*4)+1300)) % limit]   // red
-          data[i+1] =  data[(Math.round(i+1+(p3Val*5)+300)) % limit]   // green
-          data[i+2] =  data[(Math.round(i+2+(p3Val*6)+580)) % limit]   // blue
-          data[i+3] =  data[(Math.round(i+3+(p3Val*9)+3000)) % limit] 
+          data[i+0] =  data[(Math.round(i+0+(prism2Val*4)+1300)) % limit]   // red
+          data[i+1] =  data[(Math.round(i+1+(prism2Val*5)+300)) % limit]   // green
+          data[i+2] =  data[(Math.round(i+2+(prism2Val*6)+580)) % limit]   // blue
+          data[i+3] =  data[(Math.round(i+3+(prism2Val*9)+3000)) % limit] 
         }
       }
       }
 
       const PRISM3 = (data, limit) => {
-        if (p3Val == 0) return
+        if (prism2Val == 0) return
         
-        if (p3Val != 0) {
+        if (prism2Val != 0) {
           for (let i = 0; i < limit; i+=4) {
-            data[i+0] =  data[(Math.round(i+0+(p3Val*4)+1300)) % limit]   // red
-            data[i+1] =  data[(Math.round(i+1+(p3Val*5)+300)) % limit]   // green
-            data[i+2] =  data[(Math.round(i+2+(p3Val*6)+580)) % limit]   // blue
-            data[i+3] =  data[(Math.round(i+3+(p3Val*9)+3000)) % limit] 
+            data[i+0] =  data[(Math.round(i+0+(prism2Val*4)+1300)) % limit]   // red
+            data[i+1] =  data[(Math.round(i+1+(prism2Val*5)+300)) % limit]   // green
+            data[i+2] =  data[(Math.round(i+2+(prism2Val*6)+580)) % limit]   // blue
+            data[i+3] =  data[(Math.round(i+3+(prism2Val*9)+3000)) % limit] 
           }
         }
         }  
 
     const PRISM2 = (data, limit) => {
-      if (p2Val == 0) return
+      if (prism1Val == 0) return
 
         for (let i = 0; i < limit; i+=4) {
-          data[(i+0*(Math.round(p2Val*.231)) % limit)] = data[i+0]   
-          data[(i+1*(Math.round(p2Val*.213)) % limit)] = data[i+1] 
-          data[(i+2*(Math.round(p2Val*.221)) % limit)] = data[i+2] 
-          data[(i+3*(Math.round(p2Val*.247)) % limit)] = data[i+3]  
+          data[(i+0*(Math.round(prism1Val*.231)) % limit)] = data[i+0]   
+          data[(i+1*(Math.round(prism1Val*.213)) % limit)] = data[i+1] 
+          data[(i+2*(Math.round(prism1Val*.221)) % limit)] = data[i+2] 
+          data[(i+3*(Math.round(prism1Val*.247)) % limit)] = data[i+3]  
         }
     }
 
     const EMBOSS1 = (data, limit, w) => {
-        for(var i = 0; i < limit; i+=4) {                
-          data[i] = Math.round((((100 + 2*data[i] - data[i+4] - data[(i-p6Val) + w*4]) + (data[i]*7))));          
+      if (colorInv3Val == 0) return 
+        for(var i = 0; i < limit; i+=3) {                
+          data[i] = Math.round((((100 + 2*data[i] - data[i+4] - data[(i-colorInv3Val) + w*4]) + (data[i]*7))));          
         }
     }
 
     const EMBOSS2 = (data, limit, w) => {        
-      if (p6Val == 0) return 
+      if (colorInv3Val == 0) return 
        for(var i = 0; i < limit; i+=4) {        
-          data[i] = (Math.round(p6Val/.5)-50) + 2*data[i] - data[i] - data[i + w*4];          
-          data[i+3] = (Math.round(p6Val/.5)-50) + 2*data[i+2] - data[i+2] - data[Math.round((i+2) + (w*3.97))];          
-          data[i+1] = (Math.round(p6Val/.5)-50) + 2*data[i+1] - data[i+1] - data[i+1 + w*4];          
+          data[i] = (Math.round(colorInv3Val/.5)-50) + 2*data[i] - data[i] - data[i + w*4];          
+          data[i+3] = (Math.round(colorInv3Val/.5)-50) + 2*data[i+2] - data[i+2] - data[Math.round((i+2) + (w*3.97))];          
+          data[i+1] = (Math.round(colorInv3Val/.5)-50) + 2*data[i+1] - data[i+1] - data[i+1 + w*4];          
       }
 
     // for(var i = 0; i < limit; i+=4) {        
@@ -264,16 +214,102 @@ const vSynthProcessor = () => {
       }
     }
 
+    const CLOUDFOLDER1 = (data, limit) => {
+      if (colorInv1Val == 0) return
+
+      if (colorInv1Val > 0) {
+        let r = colorInv1Val
+        let g = colorInv1Val * .35
+        let b = colorInv1Val * .77
+  
+        // interpolating between full inversion value and original, per color channel
+        for (let i = 0; i < limit; i += 8) {        
+          data[i] = 255 % (Math.round(data[i] * (1 - r) + (255 - data[i]) * r))
+          data[i+1] = 255 % (Math.round(data[i+1] * (1 - g) + (255 - data[i+1]) * g)) 
+          data[i+2] = 255 % (Math.round(data[i+2] * (1 - b) + (255 - data[i+2]) * b))
+          // data[i+2] += 50 
+        }
+      }
+    }
+
+    const CLOUDFOLDER2 = (data, limit) => {
+      if (colorInv2Val == 0) return
+      
+      let r = colorInv2Val * 1.57
+      let g = colorInv2Val * 1.04
+      let b = colorInv2Val * 1.92
+
+      if (colorInv2Val > 0) {
+        for (let i = 0; i < limit; i +=4) {        
+          data[i+0] = 255% (Math.round(data[i] * (1 - r) + (255 - data[i]) * b))     
+          data[i+1] = 255% (Math.round(data[i+1] * (1 - g) + (255 - data[i+1]) * g)) 
+          data[i+2] = 255% (Math.round(data[i+2] * (1 - b) + (255 - data[i+2]) * b)) 
+        }
+      }
+    }
+
+    const ALPHAFOLD = (data, limit) => {
+      if (colorInv3Val == 0) return
+
+        // interpolating between full inversion value and original, per color channel
+        for (let i = 0; i < limit; i += 4) {        
+          data[i+3] = 255 % (Math.round(data[i+3] * (1 - colorInv3Val) + (255 - data[i+3]) * colorInv3Val))    
+          // data[i+7] = 255 % (Math.round(data[i+4] * (1 - colorInv3Val) + (255 - data[i+2]) * (colorInv3Val)))    
+        }
+
+        // for (let i = 0; i < limit; i += 4) {        
+        //   data[i+3] = 255 % (Math.round(data[i+7] * (1 - colorInv3Val) + (255 - data[i+7]) * colorInv3Val))    
+        //   // data[i+7] = 255 % (Math.round(data[i+4] * (1 - colorInv3Val) + (255 - data[i+2]) * (colorInv3Val)))    
+        // }
+      }
+    
+
+    const ACCIDENTVERTICALGLITCHTHING = (data, limit) => {
+      if (colorInv2Val == 0) return
+      
+      let r = colorInv2Val * 1.57
+      let g = colorInv2Val * 1.04
+      let b = colorInv2Val * 1.92
+
+      if (colorInv2Val > 0) {
+        for (let i = 0; i < limit; i +=4) {        
+          data[(Math.round(limit/(colorInv2Val)))%(i+0)] = 255%  (Math.round(data[i] * (1 - r) + (255 - data[i]) * b))     
+          data[(Math.round(limit/(colorInv2Val)))%(i+1)] = 255%  (Math.round(data[i+1] * (1 - r) + (255 - data[i+1]) * g)) 
+          data[(Math.round(limit/(colorInv2Val)))%(i+2)] = 255%  (Math.round(data[i+2] * (1 - b) + (255 - data[i+2]) * b)) 
+        }
+      }
+    }
+
     const INVERT = (data, limit) => {
-      if (p7Val == 0 && p8Val == 0 && p9Val == 0) return
+      if (rInvVal == 0 && gInvVal == 0 && bInvVal == 0) return
 
       // interpolating between full inversion value and original, per color channel
       for (let i = 0; i < limit; i += 4) {        
-        data[i] = Math.round(data[i] * (1 - p7Val) + (255 - data[i]) * p7Val) 
-        data[i+1] = Math.round(data[i+1] * (1 - p8Val) + (255 - data[i+1]) * p8Val)
-        data[i+2] = Math.round(data[i+2] * (1 - p9Val) + (255 - data[i+2]) * p9Val)
+        data[i] = Math.round(data[i] * (1 - rInvVal) + (255 - data[i]) * rInvVal) 
+        data[i+1] = Math.round(data[i+1] * (1 - gInvVal) + (255 - data[i+1]) * gInvVal)
+        data[i+2] = Math.round(data[i+2] * (1 - bInvVal) + (255 - data[i+2]) * bInvVal)
       }
     };
+
+    const CLOUDFOLDER3 = (data, limit) => {
+      if (colorInv3Val == 0) return
+
+      if (colorInv3Val > 0) {
+        let r = colorInv3Val
+        let g = colorInv3Val * .35
+        let b = colorInv3Val * .77
+  
+        // interpolating between full inversion value and original, per color channel
+        for (let i = 0; i < limit; i +=  2) {        
+          data[i] = 255 % (Math.round(data[i] * (1 - r) + (255 - data[i]) * r))
+          data[i+1] = 255 % (Math.round(data[i+1] * (1 - g) + (255 - data[i+1]) * g)) 
+          data[i+2] = 255 % (Math.round(data[i+2] * (1 - b) + (255 - data[i+2]) * b))
+          // data[i+2] += 50 
+        }
+
+      }
+    }
+
 
     const DOWNSAMPLE = () => {
       canvas.width  = 4096 / res
@@ -283,17 +319,17 @@ const vSynthProcessor = () => {
     const WIDTHGLITCH = () => {
       // if (p9Val === 1) return  1
 
-      return p10Val
+      return wPinchVal
     }
 
-    const HEIGHTGLITCH = () => {
+    const WIDTHSCAN = () => {
       // if (p9Val === 1) return  1
 
-      return p11Val
+      return wScanVal
     }
 
     const CONVOLUTION = (data, limit, w, h, kernel) => {
-        if (p6Val == 0) return
+        if (convVal == 0) return
 
         const k1 = [
           1, 0, -1,
@@ -315,9 +351,9 @@ const vSynthProcessor = () => {
 
 
         const emboss2= [
-          0,  (p6Val*3),  0,
+          0,  (convVal*3),  0,
           0, -2,  0,
-          (p6Val),  (p6Val*-3), 0
+          (convVal),  (convVal*-3), 0
        ]
       
     
@@ -372,7 +408,7 @@ const vSynthProcessor = () => {
     }
     // // // // // // // // // EXECUTE // // // // // // // // // // // // // // // 
     const draw = () => {
-      ctx.drawImage(video,HEIGHTGLITCH()*100,0,(ctx.canvas.width/WIDTHGLITCH() ),(ctx.canvas.height));
+      ctx.drawImage(video,WIDTHSCAN()*100,0,(ctx.canvas.width/WIDTHGLITCH() ),(ctx.canvas.height));
       let idata = ctx.getImageData(0,0,canvas.width, canvas.height);
       let data = idata.data;
       let w = idata.width;
@@ -380,11 +416,15 @@ const vSynthProcessor = () => {
       let limit = data.length
 
       CONVOLUTION(data, limit, w, h, )
+      CLOUDFOLDER2(data,limit) 
+      CLOUDFOLDER1(data,limit)
       PRISM1(data, limit)
       PRISM2(data, limit)
       INVERT(data, limit)
-      BRIGHTNESS(data,limit)
       CONTRAST(data,limit)
+      BRIGHTNESS(data,limit)
+      // INVERT(data, limit)
+
       
 
       

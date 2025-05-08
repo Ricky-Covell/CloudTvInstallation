@@ -27,7 +27,7 @@ body {
   left: 0;
   right: 0;
   z-index: -10000;
-  backdrop-filter: opacity(0%) grayscale(100%) contrast(200%) brightness(80%) blur(0px) hue-rotate(10deg) invert(0%);
+  /* backdrop-filter: opacity(0%) grayscale(100%) contrast(200%) brightness(80%) blur(0px) hue-rotate(10deg) invert(0%); */
   /* backdrop-filter: drop-shadow(200px 200px) drop-shadow(400px 400px) opacity(50%) grayscale(60%) contrast(100%) brightness(250%) blur(4px) hue-rotate(10deg) invert(100%); */
 }
 
@@ -69,10 +69,10 @@ body {
 #cloud-player {
   /* display: none; */
   background-color: black;
-  border: 1px solid rgb(0, 255, 179);
-  margin: 6% 0;
+  /* border: 1px solid rgb(0, 255, 179); */
+  /* margin: 6% 0; */
   /* border-radius: 3%; */
-  width:  70vw;   
+  width:  100vw;   
   /* height: 100vh; */
 }
 
