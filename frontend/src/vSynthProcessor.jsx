@@ -4,10 +4,10 @@ import CloudContext from "./CloudContext";
 import MidiFighterTwister from "./MidiFighterTwister";
 
 // MAY CHECKLIST
-  // Contrast/Brightness Foldover
-  // Convolution
-  // Prism1 update?
-  // colorInv to 2 knobs
+  // Drop Convolution
+  // Pre/Post Bright and  Cont?
+  // Color Inv to two knobs
+  // 
 
 //        PRISM I | PRISM II | BRIGHTNESS | CONTRAST
 //        CONV I  | R INV    | G INV      | B INV   
@@ -28,7 +28,7 @@ const vSynthProcessor = () => {
     const video = document.getElementById('cloud-video-element');
     
     let fps = 60
-    let res = 8
+    let res = 4
 
     let canvasInterval = null;
     const ctx = canvas.getContext('2d', { 
@@ -54,6 +54,8 @@ const vSynthProcessor = () => {
         prism2Val=0, 
         brightVal=25, 
         contrastVal=0, 
+        postbrightVal=25, 
+        postcontrastVal=0, 
         convVal=0, 
         rInvVal=0, 
         gInvVal=0, 
@@ -74,20 +76,21 @@ const vSynthProcessor = () => {
     const MFTupdate = () => {
     
         brightVal  = MFTtoRange(MFT.inputArray[0], 0, 127, -50, 100 )
-        contrastVal  = MFTtoRange(MFT.inputArray[1], 0, 127, -50, 250)
-        rInvVal  = MFTtoRange(MFT.inputArray[2], 0, 127, 0, 2)
-        bInvVal  = MFTtoRange(MFT.inputArray[3], 0, 127, 0, 2)
+        contrastVal  = MFTtoRange(MFT.inputArray[1], 0, 127, -50, 200)
+        postbrightVal  = MFTtoRange(MFT.inputArray[2], 0, 127, -50, 100 )
+        postcontrastVal  = MFTtoRange(MFT.inputArray[3], 0, 127, -50, 200)
         // bInvVal  = MFTtoRange(MFT.inputArray[7], 0, 127, 0, 1)
-
-        convVal  = MFTtoRange(MFT.inputArray[4], 0, 127, 0, 10)
-        colorInv1Val  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 5)
-        colorInv2Val  = MFTtoRange(MFT.inputArray[6], 0, 127, 0, 5)
-        gInvVal  = MFTtoRange(MFT.inputArray[7], 0, 127, 0, 2)
+        
+        colorInv1Val  = MFTtoRange(MFT.inputArray[4], 0, 127, 0, 5)
+        colorInv2Val  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 5)
+        rInvVal  = MFTtoRange(MFT.inputArray[6], 0, 127, -1, 1)
+        gInvVal  = MFTtoRange(MFT.inputArray[7], 0, 127, -1, 1)
+        // bInvVal  = MFTtoRange(MFT.inputArray[7], 0, 127, -1, 1)        
 
         wPinchVal = MFTtoRange(MFT.inputArray[8], 0, 127, 1, 10)
         wScanVal = MFTtoRange(MFT.inputArray[9], 0, 127, 0, 5)
-        prism1Val  = MFTtoRange(MFT.inputArray[10], 0, 127, 0, 101)
-        prism2Val  = MFTtoRange(MFT.inputArray[11], 0, 127, 1, 300000)
+        prism1Val  = MFTtoRange(MFT.inputArray[10], 0, 127, 0, 10113331)
+        prism2Val  = MFTtoRange(MFT.inputArray[11], 0, 127, 0.5, 30000)
 
       video.playbackRate = MFTtoRange(MFT.inputArray[12], 0, 127, 0, 10)
 
@@ -125,13 +128,36 @@ const vSynthProcessor = () => {
 
     
     // let contrastFactor = (259.0 * (contrast + 255.0)) / (255.0 * (259.0 - contrast));
+    const POSTCONTRAST = (data, limit) => {
+      // if (p5Val == 0) return
+
+      for (var i = 0; i < limit; i+= 4) { 
+        data[i+0] = Math.floor(259.0 * (postcontrastVal + 255.0) / (255.0 * (259.0 - postcontrastVal)) * (data[i+0] - 128.0) + 128.0)
+        data[i+1] = Math.floor(259.0 * (postcontrastVal + 255.0) / (255.0 * (259.0 - postcontrastVal)) * (data[i+1] - 128.0) + 128.0)
+        data[i+2] = Math.floor(259.0 * (postcontrastVal + 255.0) / (255.0 * (259.0 - postcontrastVal)) * (data[i+2] - 128.0) + 128.0) 
+        // data[i+3] = Math.ceil(259.0 * (postcontrastVal + 255.0) / (255.0 * (259.0 - postcontrastVal)) * (data[i+3] - 128.0) + 128.0)
+      }
+    }
+
+    const POSTBRIGHTNESS = (data, limit) => {
+      if (postbrightVal == 50) return
+
+      for (let i = 0; i < limit; i+=4) {
+        data[i]   += ((255 * (postbrightVal / 100)) - 50);
+        data[i+1] += ((255 * (postbrightVal / 100)) - 50);
+        data[i+2] += ((255 * (postbrightVal / 100)) - 50);
+      }
+    }
+
+    
+    // let contrastFactor = (259.0 * (contrast + 255.0)) / (255.0 * (259.0 - contrast));
     const CONTRAST = (data, limit) => {
       // if (p5Val == 0) return
 
       for (var i = 0; i < limit; i+= 4) { 
-        data[i+0] = Math.ceil(259.0 * (contrastVal + 255.0) / (255.0 * (259.0 - contrastVal)) * (data[i+0] - 128.0) + 128.0)
-        data[i+1] = Math.ceil(259.0 * (contrastVal + 255.0) / (255.0 * (259.0 - contrastVal)) * (data[i+1] - 128.0) + 128.0)
-        data[i+2] = Math.ceil(259.0 * (contrastVal + 255.0) / (255.0 * (259.0 - contrastVal)) * (data[i+2] - 128.0) + 128.0) 
+        data[i+0] = (Math.floor(259.0 * (contrastVal + 255.0) / (255.0 * (259.0 - contrastVal)) * (data[i+0] - 128.0) + 128.0))
+        data[i+1] = (Math.floor(259.0 * (contrastVal + 255.0) / (255.0 * (259.0 - contrastVal)) * (data[i+1] - 128.0) + 128.0))
+        data[i+2] = (Math.floor(259.0 * (contrastVal + 255.0) / (255.0 * (259.0 - contrastVal)) * (data[i+2] - 128.0) + 128.0) )
         // data[i+3] = Math.ceil(259.0 * (p5Val + 255.0) / (255.0 * (259.0 - p5Val)) * (data[i+3] - 128.0) + 128.0)
       }
     }
@@ -287,7 +313,7 @@ const vSynthProcessor = () => {
       for (let i = 0; i < limit; i += 4) {        
         data[i] = Math.round(data[i] * (1 - rInvVal) + (255 - data[i]) * rInvVal) 
         data[i+1] = Math.round(data[i+1] * (1 - gInvVal) + (255 - data[i+1]) * gInvVal)
-        data[i+2] = Math.round(data[i+2] * (1 - bInvVal) + (255 - data[i+2]) * bInvVal)
+        data[i+2] = Math.round(data[i+2] * (1 - (Math.round(rInvVal/2))) + (255 - data[i+2]) * Math.round(gInvVal))
       }
     };
 
@@ -415,14 +441,15 @@ const vSynthProcessor = () => {
       let h = idata.height;
       let limit = data.length
 
-      CONVOLUTION(data, limit, w, h, )
-      CLOUDFOLDER2(data,limit) 
-      CLOUDFOLDER1(data,limit)
       PRISM1(data, limit)
-      PRISM2(data, limit)
-      INVERT(data, limit)
-      CONTRAST(data,limit)
       BRIGHTNESS(data,limit)
+      CONTRAST(data,limit)
+      CLOUDFOLDER1(data,limit)
+      CLOUDFOLDER2(data,limit) 
+      PRISM2(data, limit) 
+      INVERT(data, limit)
+      POSTBRIGHTNESS(data,limit)
+      POSTCONTRAST(data,limit)
       // INVERT(data, limit)
 
       
