@@ -1,11 +1,14 @@
+# cloudtv-installation
+Interactive audiovisual installation based on animations of geostationary satellite imagery. Premiered at Lafayette Electronic Arts Festival 2025. Leah Bertrand and Ricky Covell.
+
 Instructions for setting up a fresh Raspberry Pi to run the installation (tested on RPi 5, 2 GB RAM). Steps should be generally applicable to similar Linux distros. Note that the installation uses midiCC messages for interactivity (controls 0-16), such as a MIDIFighterTwister.
 ## MacOS notes
 The process is streamlined somewhat on macOS – swap `sudo apt install` for `brew install`. Use `postgres.app` to make the postgresql process simpler. Install [standard version](https://supercollider.github.io/downloads) of supercollider. Use macOS `conda` install script ([details](https://github.com/conda-forge/miniforge)). Ignore the `jack`, `watchdog`, audio optimization, and startup script steps.
 
 However, `miUGens` pre-compiled binaries will need to be de-quarantined. Run `("xattr -d -r com.apple.quarantine"+Platform.userExtensionDir.quote++"/mi-UGens").runInTerminal` from the supercollider interpreter to do this.
-# First-time configuration
+## First-time configuration
 
-## Video+OS setup
+## (Operating system and video)
 ### 1. Install operating system
 Install "Raspberry Pi OS (64-bit)" for your device using [Raspberry Pi Imager](https://www.raspberrypi.com/documentation/computers/getting-started.html#raspberry-pi-imager) (complete instructions [here](https://www.raspberrypi.com/documentation/computers/getting-started.html#installing-the-operating-system)).
 ### 2.  Package manager installs
@@ -82,8 +85,7 @@ Also create missing directory (should be fixed soon)
 mkdir ../frontend/public/cloud-set
 python3 CloudPrinter.py --seed SEED
 ```
-## Audio setup
-
+## (Audio)
 ### 8. Set up jack
 #### 8.1 Install
 ```bash
@@ -107,6 +109,8 @@ cp supercolliderStandaloneRPI64/sc_ide_conf_temp.yaml ~/.config/SuperCollider/sc
 Don't forget to change your `sc_ide_conf.yaml` as described if your username is not `pi`!
 #### 8.2 Install mi-UGens extensions
 Unfortunately, the pre-compiled binaries for this extension don't work on Raspberry Pi OS. Follow build instructions [here](https://github.com/v7b1/mi-UGens) and move the resulting `mi-UGens` folder to `supercolliderStandaloneRPI64/share/user/Extensions`.
+
+## (System configuration)
 ### 9. Tweak audio settings
 https://codeberg.org/rtcqs/rtcqs
 ### 10. Automatically start on boot
