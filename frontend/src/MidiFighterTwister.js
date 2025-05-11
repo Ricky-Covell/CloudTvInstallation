@@ -26,13 +26,13 @@ class MidiFighterTwister {
         this.inputArray[message.data[1]] = message.data[2]
         this.update()
 
-        console.log(`
-          ${this.inputArray[0]}, ${this.inputArray[1]}, ${this.inputArray[2]}, ${this.inputArray[3]},  
-          ${this.inputArray[4]}, ${this.inputArray[5]}, ${this.inputArray[6]}, ${this.inputArray[7]},  
-          ${this.inputArray[8]}, ${this.inputArray[9]}, ${this.inputArray[10]}, ${this.inputArray[11]},  
-          ${this.inputArray[12]}, ${this.inputArray[13]}, ${this.inputArray[14]}, ${this.inputArray[15]},  
-          `
-        )
+        // console.log(`
+        //   ${this.inputArray[0]}, ${this.inputArray[1]}, ${this.inputArray[2]}, ${this.inputArray[3]},  
+        //   ${this.inputArray[4]}, ${this.inputArray[5]}, ${this.inputArray[6]}, ${this.inputArray[7]},  
+        //   ${this.inputArray[8]}, ${this.inputArray[9]}, ${this.inputArray[10]}, ${this.inputArray[11]},  
+        //   ${this.inputArray[12]}, ${this.inputArray[13]}, ${this.inputArray[14]}, ${this.inputArray[15]},  
+        //   `
+        // )
 
       }
 

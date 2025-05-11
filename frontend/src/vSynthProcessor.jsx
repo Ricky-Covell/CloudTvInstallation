@@ -2,43 +2,47 @@ import React, { useState, useEffect, useContext } from "react";
 import vSynthLfo from "./vSynthLfo";
 import CloudContext from "./CloudContext";
 import MidiFighterTwister from "./MidiFighterTwister";
+import vSynthOptions from "./vSynthOptions";
 
-// Leah's setup:
-  // L:
-  // W:
+// MAY 11 CHECKLIST
+  // Limit decimal place within Cloudfolder I & II
+  // Shrink Brightness Range
+  // No 0 speed
+  // Expose and Rename in seperate doc:
+    // FPS
+    // RESOLUTION DIV
+    // ASPECT RATIO
+    // FRAME NUDGE
+    // Flags?
 
-// MAY CHECKLIST
-  // Drop Convolution
-  // Pre/Post Bright and  Cont?
-  // Color Inv to two knobs
-  // 
-
-//        PRISM I | PRISM II | BRIGHTNESS | CONTRAST
-//        CONV I  | R INV    | G INV      | B INV   
-//        W Pinch | W Scan   |            |    
-//        SPEED   |          |            | VOLUME    
+  //        R INV   | G INV    | B INV      | HUE ROTATE
+  //        FOLD I  | FOLD II  | BRIGHTNESS | CONTRAST
+  //        PINCH   | SCAN     | PRISM I    | PRISM II 
+  //        SPEED   |          |            | VOLUME    
 
 
 
 const vSynthProcessor = () => {
   // const isLoaded = false
+
   setTimeout(() => {vSynth()}, 50);         // Temporary fix because listening for DOMContentLoaded wasn't working?
   
   const { clouds } = useContext(CloudContext);
-
+  const { vSynthClock, downsampleFactor, playerHeight, playerWidth, playerNudge, willReadFrequentlyFlag, alphaFlag, desynchronizedFlag} = vSynthOptions
   const vSynth = () => {
     // // // // // // // // // ELEMENTS // // // // // // // // // // // // // // // 
+    const vPlayer = document.getElementById('cloud-player')
+    vPlayer.style.width=`${playerHeight}vw`
+    vPlayer.style.height=`${playerWidth}vh`
+    vPlayer.style.marginLeft=`${playerNudge}%`
     const canvas = document.getElementById('cloud-player');
     const video = document.getElementById('cloud-video-element');
-    
-    let fps = 60
-    let res = 2
 
     let canvasInterval = null;
-    const ctx = canvas.getContext('2d', { 
-      alpha: false, 
-      willReadFrequently: false, 
-      desynchronized: true 
+    let ctx = canvas.getContext('2d', { 
+      alpha: alphaFlag, 
+      willReadFrequently: willReadFrequentlyFlag, 
+      desynchronized: desynchronizedFlag 
     })
     
     // // // // // // // // // MIDI FIGHTER TWISTER // // // // // // // // // // // // // // // 
@@ -65,8 +69,8 @@ const vSynthProcessor = () => {
         gInv=0,
         bInv=0,
         hueRotate=0,
-        colorInv1Val=0,  
-        colorInv2Val=0,
+        cloudFold1Val=0,
+        cloudFold2Val=0,
         colorInv3Val=0,
         wPinchVal=1, 
         wScanVal=1,
@@ -78,6 +82,7 @@ const vSynthProcessor = () => {
     const MFTtoRange = (val, inMin, inMax, outMin, outMax) => {
       return (val - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
     }
+    
     const MFTupdate = () => {
     
       rInv  = MFTtoRange(MFT.inputArray[0], 0, 127, 0, 1)
@@ -86,10 +91,10 @@ const vSynthProcessor = () => {
       hueRotate = MFT.inputArray[3]*3
         
         
-      colorInv1Val  = MFTtoRange(MFT.inputArray[4], 0, 127, 0, 10)
-      colorInv2Val  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 10)
+      cloudFold1Val  = MFTtoRange(MFT.inputArray[4], 0, 127, 0, 10)
+      cloudFold2Val  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 10)
       // convVal  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 5)
-      postbrightVal  = MFTtoRange(MFT.inputArray[6], 0, 127, -50, 100 )
+      postbrightVal  = MFTtoRange(MFT.inputArray[6], 0, 127, 0, 35)
       postcontrastVal  = MFTtoRange(MFT.inputArray[7], 0, 127, -100, 200)        
 
       wPinchVal = MFTtoRange(MFT.inputArray[8], 0, 127, 1, 10)
@@ -97,15 +102,15 @@ const vSynthProcessor = () => {
       prism1Val  = MFTtoRange(MFT.inputArray[10], 0, 127, 0, 10111)
       prism2Val  = MFTtoRange(MFT.inputArray[11], 0, 127, 0, 30000)
 
-      video.playbackRate = MFTtoRange(MFT.inputArray[12], 0, 127, 0, 10)
+      video.playbackRate = MFTtoRange(MFT.inputArray[12], 0, 127, 1, 10)
+      // alphaIO = MFTtoRange(MFT.inputArray[14], 0, 127, 0, 1)
+
+      
 
       // if (video.src != `/cloud-set/${clouds[Math.round(MFTtoRange(MFT.inputArray[15], 0, 127, 0, 15))]}`) {
       //   video.src =     `/cloud-set/${clouds[Math.round(MFTtoRange(MFT.inputArray[15], 0, 127, 0, 15))]}`
       //   // video.play()
       // }
-    
-      // res = evt.target.value
-      // DOWNSAMPLE()
       
       // fps = MFTtoRange(MFT.inputArray[13], 0, 127, 30, 300)
       // window.clearInterval(canvasInterval)
@@ -114,7 +119,18 @@ const vSynthProcessor = () => {
       // }, fps);
 
     }
-    MFT.setUpdate(MFTupdate)
+
+    const MFTdebounce = (update, delay) => {
+      let timeout;
+      return function () {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => {
+              update()
+          }, delay);
+      }
+    }
+
+    MFT.setUpdate(MFTdebounce(MFTupdate, 1))
     
     // // // // // // // // // PROCESSORS // // // // // // // // // // // // // // // 
     const drawOriginal = () => {
@@ -145,7 +161,7 @@ const vSynthProcessor = () => {
     }
 
     const POSTBRIGHTNESS = (data, limit) => {
-      if (postbrightVal == 50) return
+      // if (postbrightVal == 50) return
 
       for (let i = 0; i < limit; i+=4) {
         data[i]   += ((255 * (postbrightVal / 100)) - 50);
@@ -246,35 +262,35 @@ const vSynthProcessor = () => {
     }
 
     const CLOUDFOLDER1 = (data, limit) => {
-      if (colorInv1Val == 0) return
+      if (cloudFold1Val == 0) return
 
-      if (colorInv1Val > 0) {
-        let r = colorInv1Val
-        let g = colorInv1Val * .35
-        let b = colorInv1Val * .77
+      if (cloudFold1Val > 0) {
+        let r = ((cloudFold1Val)      )
+        let g = ((cloudFold1Val * .35))
+        let b = ((cloudFold1Val * .77))
   
         // interpolating between full inversion value and original, per color channel
         for (let i = 0; i < limit; i += 8) {        
-          data[i] = 255 % (Math.round(data[i] * (1 - r) + (255 - data[i]) * r))
-          data[i+1] = 255 % (Math.round(data[i+1] * (1 - g) + (255 - data[i+1]) * g)) 
-          data[i+2] = 255 % (Math.round(data[i+2] * (1 - b) + (255 - data[i+2]) * b))
+          data[i]   = 255 % (((  data[i] * (1 - r) + (255 - data[i]) * r)))
+          data[i+1] = 255 % (((data[i+1] * (1 - g) + (255 - data[i+1]) * g)))
+          data[i+2] = 255 % (((data[i+2] * (1 - b) + (255 - data[i+2]) * b)))
           // data[i+2] += 50 
         }
       }
     }
 
     const CLOUDFOLDER2 = (data, limit) => {
-      if (colorInv2Val == 0) return
+      if (cloudFold2Val == 0) return
       
-      let r = ((colorInv2Val) * .9)
-      let g = ((colorInv2Val) * 1.1)
-      let b = ((colorInv2Val) * 1.3)
+      let r = (((cloudFold2Val) * .9))
+      let g = (((cloudFold2Val) * 1.1))
+      let b = (((cloudFold2Val) * 1.3))
 
-      if (colorInv2Val > 0) {
+      if (cloudFold2Val > 0) {
         for (let i = 0; i < limit; i +=4) {        
-          data[i+0] = 255% (Math.round(data[i] * (1 - r) + (255 - data[i]) * b))     
-          data[i+1] = 255% (Math.round(data[i+1] * (1 - g) + (255 - data[i+1]) * r)) 
-          data[i+2] = 255% (Math.round(data[i+2] * (1 - b) + (255 - data[i+2]) * g)) 
+          data[i+0] = 255 % (((data[i] * (1 - r) + (255 - data[i]) * b)))
+          data[i+1] = 255 % (((data[i+1] * (1 - g) + (255 - data[i+1]) * r)))
+          data[i+2] = 255 % (((data[i+2] * (1 - b) + (255 - data[i+2]) * g)))
 
         }
       }
@@ -352,8 +368,8 @@ const vSynthProcessor = () => {
 
 
     const DOWNSAMPLE = () => {
-      canvas.width  = 2000 / res
-      canvas.height = 2000 / res
+      canvas.width  = 2000 / downsampleFactor
+      canvas.height = 2000 / downsampleFactor
     }
 
     const WIDTHGLITCH = () => {
@@ -367,6 +383,30 @@ const vSynthProcessor = () => {
 
       return wScanVal
     }
+
+    // const ALPHAMODE = () => {
+    //   if (alphaIO > 0.5) {
+    //     ctx = canvas.getContext('2d', { 
+    //       alpha: true, 
+    //       willReadFrequently: false, 
+    //       desynchronized: true 
+    //     })
+
+    //     alphaNow = true
+    //   }
+
+    //   else if (alphaIO <= 0.5) {
+    //     ctx = canvas.getContext('2d', { 
+    //       alpha: false, 
+    //       willReadFrequently: false, 
+    //       desynchronized: true 
+    //     })
+
+    //     alphaNow = false
+    //   }
+
+    //   console.log('ALPHA')
+    // }
 
     const CONVOLUTION = (data, limit, w, h, kernel) => {
         if (convVal == 0) return
@@ -447,7 +487,7 @@ const vSynthProcessor = () => {
     
     }
     // // // // // // // // // EXECUTE // // // // // // // // // // // // // // // 
-    const draw = () => {
+    const draw = () => {      
       ctx.filter = `hue-rotate(${hueRotate}deg)`
       ctx.drawImage(video,WIDTHSCAN()*100,0,(ctx.canvas.width/WIDTHGLITCH() ),(ctx.canvas.height));
       let idata = ctx.getImageData(0,0,canvas.width, canvas.height);
@@ -467,20 +507,17 @@ const vSynthProcessor = () => {
       
       
       
-      
       ctx.putImageData(idata,0,0);
     }
     
     canvasInterval = window.setInterval(() => {
       // drawOriginal()
       // requestAnimationFrame(draw)
-      draw() 
+      draw()   
       // PRISMcheck()
-    }, fps);
+    }, vSynthClock);
 
-    DOWNSAMPLE()
-    // canvas.width = 4096/32
-    // canvas.height = 2160/32
+    DOWNSAMPLE()    
   } 
 
 

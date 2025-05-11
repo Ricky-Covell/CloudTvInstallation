@@ -19,8 +19,8 @@ const CloudPlayer = () => {
               muted 
               loop    
               play
-              width={4096}
-              height={2160}  
+              width={2000}
+              height={2000}  
               src={randomVidOnLoad}              
             >
               {/* { clouds.map(cloud => {
