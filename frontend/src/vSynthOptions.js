@@ -5,6 +5,7 @@ const vSynthOptions = {
     // Larger values = Better performance at the risk of choppier video
   downsampleFactor: 2, 
     // Default: 2
+    // Leahs Default: 4
     // Divides vSynth's internal resolution by int
     // Large values = Better performance but reduces detail
 
