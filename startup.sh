@@ -1,19 +1,28 @@
 #!/bin/bash
 #flask backend
-conda activate
-cd ~/cloudtv-installation/backend
-flask run &> ~/cloudtv-installation/flask.log
-echo $! > ~/cloudtv-installation/flask.pid
+srcpath=$(pwd)
+source ~/.bashrc
+echo "Launching flask"
+cd $srcpath/backend
+flask run > $srcpath/flask.log 2>&1 &
+echo $! > $srcpath/flask.pid
 #node frontend
+echo "Launching node"
 cd ../frontend
-npm run dev &> ~/cloudtv-installation/npm.log
-echo $! > ~/cloudtv-installation/npm.pid
+npm run dev > $srcpath/npm.log 2>&1 &
+echo $! > $srcpath/npm.pid
 #audio server
+echo "Launching audio"
+qjackctl --start &
+sleep 60
+echo "Launching supercollider"
 cd ~/supercolliderStandaloneRPI64
 export QT_QPA_PLATFORM=offscreen
-#./sclang -a -l ~/supercolliderStandaloneRPI64/sclang.yaml ~/cloudtv-installation/audio-main.scd &> ~/cloudtv-installation/sclang.log
-echo $! > ~/cloudtv-installation/sclang.pid
+export PATH=.:$PATH
+./sclang -a -l ~/supercolliderStandaloneRPI64/sclang.yaml $srcpath/audio-main.scd > $srcpath/sclang.log 2>&1 &
+echo $! > $srcpath/sclang.pid
 #web browser
-sleep 5
-#DISPLAY=:0 chromium-browser --kiosk --app=https://localhost:3000 &> chromium.log
-echo $! > ~/cloudtv-installation/chromium.pid
+sleep 60
+echo "Launching browser"
+chromium-browser --kiosk > $srcpath/chromium.log 2>&1 &
+echo $! > $srcpath/chromium.pid
