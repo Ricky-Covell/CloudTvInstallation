@@ -36,8 +36,8 @@ const CloudPlayer = () => {
 
             <div id='cloud-player-container' class='cloud-flexbox'>
                 <canvas id="cloud-player"
-                  width={4096/4}
-                  height={2160/4}
+                  width={2000}
+                  height={2000}
                   />
             </div>
             
