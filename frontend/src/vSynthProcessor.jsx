@@ -80,21 +80,22 @@ const vSynthProcessor = () => {
     }
     const MFTupdate = () => {
     
-      rInv  = MFTtoRange(MFT.inputArray[0], 0, 127, -1, 1)
-      gInv  = MFTtoRange(MFT.inputArray[1], 0, 127, -1, 1)
-      bInv  = MFTtoRange(MFT.inputArray[2], 0, 127, -1, 1)
+      rInv  = MFTtoRange(MFT.inputArray[0], 0, 127, 0, 1)
+      gInv  = MFTtoRange(MFT.inputArray[1], 0, 127, 0, 1)
+      bInv  = MFTtoRange(MFT.inputArray[2], 0, 127, 0, 1)
       hueRotate = MFT.inputArray[3]*3
         
         
-      colorInv1Val  = MFTtoRange(MFT.inputArray[4], 0, 127, 0, 5)
-      colorInv2Val  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 5)
+      colorInv1Val  = MFTtoRange(MFT.inputArray[4], 0, 127, 0, 10)
+      colorInv2Val  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 10)
+      // convVal  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 5)
       postbrightVal  = MFTtoRange(MFT.inputArray[6], 0, 127, -50, 100 )
       postcontrastVal  = MFTtoRange(MFT.inputArray[7], 0, 127, -100, 200)        
 
       wPinchVal = MFTtoRange(MFT.inputArray[8], 0, 127, 1, 10)
-      wScanVal = MFTtoRange(MFT.inputArray[9], 0, 127, 0, 5)
-      prism1Val  = MFTtoRange(MFT.inputArray[10], 0, 127, 0, 1011)
-      prism2Val  = MFTtoRange(MFT.inputArray[11], 0, 127, 0.5, 30000)
+      wScanVal = MFTtoRange(MFT.inputArray[9], 0, 127, 0, 10)
+      prism1Val  = MFTtoRange(MFT.inputArray[10], 0, 127, 0, 10111)
+      prism2Val  = MFTtoRange(MFT.inputArray[11], 0, 127, 0, 30000)
 
       video.playbackRate = MFTtoRange(MFT.inputArray[12], 0, 127, 0, 10)
 
@@ -265,15 +266,15 @@ const vSynthProcessor = () => {
     const CLOUDFOLDER2 = (data, limit) => {
       if (colorInv2Val == 0) return
       
-      let r = colorInv2Val * .9
-      let g = colorInv2Val * 1.1
-      let b = colorInv2Val * 1.3
+      let r = ((colorInv2Val) * .9)
+      let g = ((colorInv2Val) * 1.1)
+      let b = ((colorInv2Val) * 1.3)
 
       if (colorInv2Val > 0) {
         for (let i = 0; i < limit; i +=4) {        
           data[i+0] = 255% (Math.round(data[i] * (1 - r) + (255 - data[i]) * b))     
-          data[i+1] = 255% (Math.round(data[i+1] * (1 - g) + (255 - data[i+1]) * g)) 
-          data[i+2] = 255% (Math.round(data[i+2] * (1 - b) + (255 - data[i+2]) * b)) 
+          data[i+1] = 255% (Math.round(data[i+1] * (1 - g) + (255 - data[i+1]) * r)) 
+          data[i+2] = 255% (Math.round(data[i+2] * (1 - b) + (255 - data[i+2]) * g)) 
 
         }
       }
@@ -456,8 +457,8 @@ const vSynthProcessor = () => {
       let limit = data.length
       
       CLOUDFOLDER2(data,limit)    
+      // CONVOLUTION(data,limit,w,h)
       PRISM1(data, limit)
-      BRIGHTNESS(data,limit)
       PRISM2(data, limit) 
       CLOUDFOLDER1(data,limit)
       INVERT(data, limit)
