@@ -130,6 +130,14 @@ Restart supercollider, flask, node, and chromium if they are closed or crash.
 # Startup instructions
 These steps must be run each time after boot.
 ## Script
+```bash
+sudo vi /etc/xdg/autostart/display.desktop
+```
+```bash
+[Desktop Entry]
+Name=CloudTV
+Exec=/usr/bin/bash -c 'cd ~/cloudtv-installation;./startup.sh'
+```
 ## Manual
 ### 1. Check postgresql is running
 ```shell

@@ -2,7 +2,7 @@
 #first-time-only setup steps 
 cp ../GOES-renders/* ./backend/GOES-renders/
 cd backend
-conda activate
+source ~/.bashrc
 python3 CloudPrinter.py --seed SEED
 cd ../frontend
 npm install
