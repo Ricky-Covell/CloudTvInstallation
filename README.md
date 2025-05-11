@@ -125,7 +125,7 @@ RebootWatchdogSec=5min
 
 This will reboot the computer after 15 seconds if it stops responding. It will wait 5 minutes for a gentle reboot before forcefully resetting the system.
 #### 11.2 software watchdog
-Restart supercollider, flask, node, and chromium if they are closed or crash.
+__TBD__. Restart supercollider, flask, node, and chromium if they are closed or crash.
 
 # Startup instructions
 These steps must be run each time after boot.
