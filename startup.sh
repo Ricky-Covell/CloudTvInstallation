@@ -27,5 +27,5 @@ echo $! > $srcpath/sclang.pid
 #web browser
 sleep 20
 echo "Launching browser"
-chromium-browser --kiosk https://localhost:3000 > $srcpath/chromium.log 2>&1 &
+chromium-browser --kiosk http://localhost:3000 > $srcpath/chromium.log 2>&1 &
 echo $! > $srcpath/chromium.pid
