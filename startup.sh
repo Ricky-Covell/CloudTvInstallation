@@ -18,12 +18,16 @@ echo $! > $srcpath/npm.pid
 echo "Launching audio driver"
 qjackctl --start &
 sleep 30
+#audio synthesizer
 echo "Launching supercollider"
 cd ~/supercolliderStandaloneRPI64
 export QT_QPA_PLATFORM=offscreen
 export PATH=.:$PATH
 ./sclang -a -l ~/supercolliderStandaloneRPI64/sclang.yaml $srcpath/audio-main.scd > $srcpath/sclang.log 2>&1 &
 echo $! > $srcpath/sclang.pid
+sleep 15
+#connect midi out from supercollider to MFT
+aconnect 129:4 28:0
 #web browser
 sleep 20
 echo "Launching browser"

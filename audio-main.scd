@@ -1,4 +1,39 @@
+//close other servers
 Server.killAll;
+//MIDI reset routine
+~init_state = {
+	arg i;
+	var random = Array[0,1,2,3,13,14];
+	var small  = Array[8,9,10,11];
+	var zero   = Array[4,5];
+	var half   = Array[6,7,12,15];
+	var funcs  = Array[
+		{127.rand.asInteger}, //random
+		{5.rand.asInteger},   //small
+		{0},                    //zero
+		{63}                    //half
+	];
+	var choice;
+	if(random.includes(i), {choice=0}, {});
+	if(small.includes(i),  {choice=1}, {});
+	if(zero.includes(i),   {choice=2}, {});
+	if(half.includes(i),   {choice=3}, {});
+	//choice.postln;
+	funcs[choice].value;
+};
+MIDIClient.init;
+//connect supercollider to MFT in jack graph
+m = MIDIOut.new(0);
+//reset every 2 hours
+{
+	{
+		60.wait;
+		16.do({|i| m.control(
+			chan: 0, ctlNum: i, val:~init_state.value(i)
+		)});
+	}.loop;
+}.fork;
+
 //MIDI mapping
 ~domap = {
 	arg state, params, diff;
@@ -70,9 +105,7 @@ MIDIIn.connectAll;
 16.do({|num| MIDIdef.cc(num.asSymbol,
 	{|val, num| ~future[num] = val/127.0}
 )});
-//var col = num%4;
-//var row = (num/4).floor.asInteger;
-//(row.asString++", "++col.asString).postln;
+
 //~state smooths out knob-turns on a fixed clock
 {
 	{
@@ -88,15 +121,6 @@ MIDIIn.connectAll;
 		~domap.value(~state,~params,~diff[0]);
 	}.loop;
 }.fork;
-
-//{
-//	{
-//		15.0.wait;
-//		~params.postln;
-//		//~diff.postln;
-//	}.loop;
-//}.fork;
-
 
 //patterns and effects
 s.waitForBoot({
