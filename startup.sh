@@ -17,7 +17,7 @@ echo $! > $srcpath/npm.pid
 #audio server
 echo "Launching audio driver"
 qjackctl --start &
-sleep 20
+sleep 30
 echo "Launching supercollider"
 cd ~/supercolliderStandaloneRPI64
 export QT_QPA_PLATFORM=offscreen

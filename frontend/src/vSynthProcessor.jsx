@@ -95,10 +95,10 @@ const vSynthProcessor = () => {
       cloudFold2Val  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 10)
       // convVal  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 5)
       postbrightVal  = MFTtoRange(MFT.inputArray[6], 0, 127, 0, 35)
-      postcontrastVal  = MFTtoRange(MFT.inputArray[7], 0, 127, -100, 200)        
+      postcontrastVal  = MFTtoRange(MFT.inputArray[7], 0, 127, -50, 200)        
 
       wPinchVal = MFTtoRange(MFT.inputArray[8], 0, 127, 1, 10)
-      wScanVal = MFTtoRange(MFT.inputArray[9], 0, 127, 0, 9)
+      wScanVal = MFTtoRange(MFT.inputArray[9], 0, 127, 0, 3)
       prism1Val  = MFTtoRange(MFT.inputArray[10], 0, 127, 0, 10111)
       prism2Val  = MFTtoRange(MFT.inputArray[11], 0, 127, 0, 30000)
 
