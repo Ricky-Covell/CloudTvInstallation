@@ -98,7 +98,7 @@ const vSynthProcessor = () => {
       postcontrastVal  = MFTtoRange(MFT.inputArray[7], 0, 127, -100, 200)        
 
       wPinchVal = MFTtoRange(MFT.inputArray[8], 0, 127, 1, 10)
-      wScanVal = MFTtoRange(MFT.inputArray[9], 0, 127, 0, 10)
+      wScanVal = MFTtoRange(MFT.inputArray[9], 0, 127, 0, 9)
       prism1Val  = MFTtoRange(MFT.inputArray[10], 0, 127, 0, 10111)
       prism2Val  = MFTtoRange(MFT.inputArray[11], 0, 127, 0, 30000)
 
