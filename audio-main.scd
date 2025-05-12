@@ -24,10 +24,10 @@ Server.killAll;
 MIDIClient.init;
 //connect supercollider to MFT in jack graph
 m = MIDIOut.new(0);
-//reset every 2 hours
+//reset every hour
 {
 	{
-		60.wait;
+		3600.wait;
 		16.do({|i| m.control(
 			chan: 0, ctlNum: i, val:~init_state.value(i)
 		)});
