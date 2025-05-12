@@ -4,21 +4,13 @@ import CloudContext from "./CloudContext";
 import MidiFighterTwister from "./MidiFighterTwister";
 import vSynthOptions from "./vSynthOptions";
 
-// MAY 11 CHECKLIST
-  // Limit decimal place within Cloudfolder I & II
-  // Shrink Brightness Range
-  // No 0 speed
-  // Expose and Rename in seperate doc:
-    // FPS
-    // RESOLUTION DIV
-    // ASPECT RATIO
-    // FRAME NUDGE
-    // Flags?
+// MAY 12 SHORTLIST
+  // hide mouse
 
   //        R INV   | G INV    | B INV      | HUE ROTATE
   //        FOLD I  | FOLD II  | BRIGHTNESS | CONTRAST
   //        PINCH   | SCAN     | PRISM I    | PRISM II 
-  //        SPEED   |          |            | VOLUME    
+  //        SPEED   |          | vidSELECT  | 
 
 
 
@@ -38,8 +30,8 @@ const vSynthProcessor = () => {
 
     const canvas = document.getElementById('cloud-player');
     const video = document.getElementById('cloud-video-element');
-
     const cloudsetLength = clouds.length - 1
+    document.body.style.cursor = 'none'
 
     let canvasInterval = null;
     let ctx = canvas.getContext('2d', { 
@@ -78,8 +70,9 @@ const vSynthProcessor = () => {
         wPinchVal=1, 
         wScanVal=1,
         p12Val=1, 
-        p13Val=1
-
+        p13Val=1,
+        pbSelectVal //also affects Prism2() to create more dramatic shifts during video swap
+        
 
     // MFT AGAIN 
     const MFTtoRange = (val, inMin, inMax, outMin, outMax) => {
@@ -95,21 +88,26 @@ const vSynthProcessor = () => {
         
         
       cloudFold1Val  = MFTtoRange(MFT.inputArray[4], 0, 127, 0, 10)
-      cloudFold2Val  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 10)
+      cloudFold2Val  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 12)
       // convVal  = MFTtoRange(MFT.inputArray[5], 0, 127, 0, 5)
       postbrightVal  = MFTtoRange(MFT.inputArray[6], 0, 127, 0, 35)
       postcontrastVal  = MFTtoRange(MFT.inputArray[7], 0, 127, -50, 200)        
 
       wPinchVal = MFTtoRange(MFT.inputArray[8], 0, 127, 1, 10)
       wScanVal = MFTtoRange(MFT.inputArray[9], 0, 127, 0, 3)
-      prism1Val  = MFTtoRange(MFT.inputArray[10], 0, 127, 0, 10111)
+      // prism1Val  = MFTtoRange(MFT.inputArray[10], 0, 127, 0, 10111)
+      prism1Val  = MFTtoRange(MFT.inputArray[10], 0, 127, 0, 1011)
       prism2Val  = MFTtoRange(MFT.inputArray[11], 0, 127, 0, 30000)
 
       video.playbackRate = MFTtoRange(MFT.inputArray[12], 0, 127, 1, 10)      
-      if (video.src !== `http://localhost:3000/cloud-set/${clouds[Math.floor(MFTtoRange(MFT.inputArray[14], 0, 127, 0, cloudsetLength))]}`) {
-        video.src =     `/cloud-set/${clouds[Math.floor(MFTtoRange(MFT.inputArray[14], 0, 127, 0, cloudsetLength))]}`        
+      pbSelectVal = Math.floor(MFTtoRange(MFT.inputArray[14], 0, 127, 0, cloudsetLength))
+
+      // 'change' listener for pbSelection
+      if (video.src !== `http://localhost:3000/cloud-set/${clouds[pbSelectVal]}`) {
+        video.src =     `/cloud-set/${clouds[pbSelectVal]}`        
         video.play()
-    }
+      }
+
     }
 
     const MFTdebounce = (update, delay) => {
@@ -175,15 +173,13 @@ const vSynthProcessor = () => {
       }
     }
 
-    const PRISM1 = (data, limit) => {
-      if (prism1Val == 0 && prism2Val == 0) return
-      
+    const PRISM1 = (data, limit) => {      
       if (prism2Val != 0) {
         for (let i = 0; i < limit; i+=4) {
-          data[i+0] =  data[(Math.round(i+0+(prism2Val*4)+1300)) % limit]   // red
-          data[i+1] =  data[(Math.round(i+1+(prism2Val*5)+300)) % limit]   // green
-          data[i+2] =  data[(Math.round(i+2+(prism2Val*6)+580)) % limit]   // blue
-          data[i+3] =  data[(Math.round(i+3+(prism2Val*9)+3000)) % limit] 
+          data[i+0] =  data[(Math.round(i+(0*pbSelectVal)+(prism2Val*4)+1300)) % limit]   // red
+          data[i+1] =  data[(Math.round(i+(1*pbSelectVal)+(prism2Val*5)+300)) % limit]   // green
+          data[i+2] =  data[(Math.round(i+(2*pbSelectVal)+(prism2Val*6)+580)) % limit]   // blue
+          data[i+3] =  data[(Math.round(i+(3*pbSelectVal)+(prism2Val*9)+3000)) % limit] 
         }
       }
       }
@@ -203,14 +199,15 @@ const vSynthProcessor = () => {
 
     const PRISM2 = (data, limit) => {
       if (prism1Val == 0) return
-
         for (let i = 0; i < limit; i+=4) {
-          data[(i+0*(Math.round(prism1Val*.231)) % limit)] = data[i+0]   
-          data[(i+1*(Math.round(prism1Val*.213)) % limit)] = data[i+1] 
-          data[(i+2*(Math.round(prism1Val*.221)) % limit)] = data[i+2] 
-          data[(i+3*(Math.round(prism1Val*.247)) % limit)] = data[i+3]  
+          data[(i+0*(Math.round(prism1Val*(pbSelectVal*.2)*.231)) % limit)] = data[i+(0)]   
+          data[(i+1*(Math.round(prism1Val*(pbSelectVal*.3)*.213)) % limit)] = data[i+(1)] 
+          data[(i+2*(Math.round(prism1Val*(pbSelectVal*.4)*.221)) % limit)] = data[i+(2)] 
+          data[(i+3*(Math.round(prism1Val*(pbSelectVal*.5)*.247)) % limit)] = data[i+(3)]  
         }
     }
+
+    
 
     const EMBOSS1 = (data, limit, w) => {
       if (colorInv3Val == 0) return 
@@ -274,9 +271,9 @@ const vSynthProcessor = () => {
     const CLOUDFOLDER2 = (data, limit) => {
       if (cloudFold2Val == 0) return
       
-      let r = (((cloudFold2Val) * .9))
-      let g = (((cloudFold2Val) * 1.1))
-      let b = (((cloudFold2Val) * 1.3))
+      let r = (((cloudFold2Val) * .12))
+      let g = (((cloudFold2Val) * .23))
+      let b = (((cloudFold2Val) * .41))
 
       if (cloudFold2Val > 0) {
         for (let i = 0; i < limit; i +=4) {        
@@ -489,7 +486,6 @@ const vSynthProcessor = () => {
       let limit = data.length
       
       CLOUDFOLDER2(data,limit)    
-      // CONVOLUTION(data,limit,w,h)
       PRISM1(data, limit)
       PRISM2(data, limit) 
       CLOUDFOLDER1(data,limit)
@@ -508,7 +504,6 @@ const vSynthProcessor = () => {
       draw()   
       // PRISMcheck()
     }, vSynthClock);
-
     DOWNSAMPLE()    
   } 
 
