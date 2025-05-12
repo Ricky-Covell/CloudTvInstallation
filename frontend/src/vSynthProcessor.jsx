@@ -35,8 +35,11 @@ const vSynthProcessor = () => {
     vPlayer.style.width=`${playerHeight}vw`
     vPlayer.style.height=`${playerWidth}vh`
     vPlayer.style.marginLeft=`${playerNudge}%`
+
     const canvas = document.getElementById('cloud-player');
     const video = document.getElementById('cloud-video-element');
+
+    const cloudsetLength = clouds.length - 1
 
     let canvasInterval = null;
     let ctx = canvas.getContext('2d', { 
@@ -102,22 +105,11 @@ const vSynthProcessor = () => {
       prism1Val  = MFTtoRange(MFT.inputArray[10], 0, 127, 0, 10111)
       prism2Val  = MFTtoRange(MFT.inputArray[11], 0, 127, 0, 30000)
 
-      video.playbackRate = MFTtoRange(MFT.inputArray[12], 0, 127, 1, 10)
-      // alphaIO = MFTtoRange(MFT.inputArray[14], 0, 127, 0, 1)
-
-      
-
-      // if (video.src != `/cloud-set/${clouds[Math.round(MFTtoRange(MFT.inputArray[15], 0, 127, 0, 15))]}`) {
-      //   video.src =     `/cloud-set/${clouds[Math.round(MFTtoRange(MFT.inputArray[15], 0, 127, 0, 15))]}`
-      //   // video.play()
-      // }
-      
-      // fps = MFTtoRange(MFT.inputArray[13], 0, 127, 30, 300)
-      // window.clearInterval(canvasInterval)
-      // canvasInterval = window.setInterval(() => {
-      //   draw() 
-      // }, fps);
-
+      video.playbackRate = MFTtoRange(MFT.inputArray[12], 0, 127, 1, 10)      
+      if (video.src !== `http://localhost:3000/cloud-set/${clouds[Math.floor(MFTtoRange(MFT.inputArray[14], 0, 127, 0, cloudsetLength))]}`) {
+        video.src =     `/cloud-set/${clouds[Math.floor(MFTtoRange(MFT.inputArray[14], 0, 127, 0, cloudsetLength))]}`        
+        video.play()
+    }
     }
 
     const MFTdebounce = (update, delay) => {
