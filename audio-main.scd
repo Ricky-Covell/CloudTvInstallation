@@ -27,10 +27,10 @@ m = MIDIOut.new(0);
 //reset every hour
 {
 	{
-		3600.wait;
 		16.do({|i| m.control(
 			chan: 0, ctlNum: i, val:~init_state.value(i)
 		)});
+		3600.wait;
 	}.loop;
 }.fork;
 
@@ -38,23 +38,25 @@ m = MIDIOut.new(0);
 ~domap = {
 	arg state, params, diff;
 	//--- FIRST ROW ---
-	params.put(\modfreq,     state[ 0].linlin(0, 1,  0,    5.0));
-	params.put(\modamp,      state[ 1].linlin(0, 1,  0,    0.5));
-	params.put(\filtfreq,    state[ 2].linlin(0, 1,  0,   10.0));
-	params.put(\scaledur,    state[ 3].linlin(0, 1, 12,   96  ));
+	params.put(\chorddur,    state[ 0].linlin(0, 1,  8,   64  ));
+	params.put(\voicingdur,  state[ 1].linlin(0, 1,  4,   64  ));
+	params.put(\coctave,     state[ 2].linlin(0, 1,  2,    4  ));
+	params.put(\filtfreq,    state[ 3].linlin(0, 1,  0,   10.0));
 	//--- SECOND ROW ---
-	params.put(\freeziness,  state[ 4].linlin(0, 1,  0,    1  ));
-	params.put(\freezepitch, state[ 5].linlin(0, 1,  1.1,  0.1));
-	params.put(\durskew,     state[ 6].linlin(0, 1, -0.5,  0.5));
-	params.put(\overlap,     state[ 7].linlin(0, 1,  1,    3  ));
+	params.put(\modfreq,     state[ 4].linlin(0, 1,  0,    7.5));
+	params.put(\modamp,      state[ 5].linlin(0, 1,  0,    0.75));
+	params.put(\freeziness,  state[ 6].linlin(0, 1,  0.2,  1  ));
+	params.put(\freezepitch, state[ 7].linlin(0, 1,  1.1,  0.1));
 	//--- THIRD ROW ---
-	params.put(\tempo,       state[ 8].linlin(0, 1,  5,   15  ));
-	params.put(\burstiness,  state[ 9].linlin(0, 1, 10,   20  ));
-	params.put(\nburst,      state[10].linlin(0, 1,  2,    6  ));
-	params.put(\chorddur,    state[11].linlin(0, 1,  8,   64  ));
+	params.put(\noctaves,    state[ 8].linlin(0, 1,  2,    5  ));
+	params.put(\scaledur,    state[ 9].linlin(0, 1, 16,   64  ));
+	params.put(\durskew,     state[10].linlin(0, 1, -0.5,  0.5));
+	params.put(\overlap,     state[11].linlin(0, 1,  1,    3  ));
 	//--- FOURTH ROW ---
-	params.put(\voicingdur,  state[12].linlin(0, 1,  4,   64  ));
-	params.put(\noctaves,    state[13].linlin(0, 1,  1,    5  ));
+	params.put(\tempo,       state[12].linlin(0, 1,  5,   20  ));
+	params.put(\burstiness,  state[13].linlin(0, 1, 10,   20  ));
+	params.put(\nburst,      state[14].linlin(0, 1,  2,    6  ));
+	//params.put(\volume,      state[15].linlin(0, 1,  0.5,  1.25));
 
 	//--- METAPARAMETERS ---
 	params.put(\dist,             diff.linlin(0, 0.7,0.5, 50.0));
@@ -87,6 +89,7 @@ m = MIDIOut.new(0);
 	\chordur->12,    //num notes per chord
 	\voicingdur->12, //num notes per pitch->octave mapping
 	\noctaves->3,    //num octaves to spread chord over
+	\coctave->3,     //center octave
 	//\scaleblur->0,   //1 vs. 2 simultaneous tonalities
 	//\clumping->0,    //draw single notes vs. chords
 	//\enharm->0,      //enharmonic vs. isomorphic tonality changes
@@ -96,6 +99,7 @@ m = MIDIOut.new(0);
 	\freeziness->0,  //prob
 	\freezepitch->1, //vari rate
 	\dist->0,        //distortion
+	\volume->1       //volume
 	//\verb->0,        //reverb
 	//\verbcrush->0    //runaway reverb feedback and/or reverb freezing
 
@@ -105,6 +109,11 @@ MIDIIn.connectAll;
 16.do({|num| MIDIdef.cc(num.asSymbol,
 	{|val, num| ~future[num] = val/127.0}
 )});
+
+//volume knob: 0.5 to 1.25
+MIDIdef.cc(\15, {|val,num|
+	Server.local.volume = val.linlin(0, 127,  -12.0,  3.0);
+}, 15);
 
 //~state smooths out knob-turns on a fixed clock
 {
@@ -164,7 +173,11 @@ s.waitForBoot({
 		//one octave for each scale degree, rotating every \voicingdur notes
 		~pvoicing = (~pdegree + Pdup(Pfunc{~params.at(\voicingdur)},Pwhite(0,5,inf)));
 		//octaves 3 to 6, with squishing
-		~pvoicing = (~pvoicing % Pfunc{~params.at(\noctaves)}.asInteger).asInteger+4;
+		~pvoicing = ((~pvoicing %
+			Pfunc{~params.at(\noctaves)}.asInteger).asInteger +
+		Pfunc{~params.at(\coctave)}) % 7 + 1;
+
+
 		//TODO: should low octave range always mean low pitches?
 		//TODO: subset tetrads to triads?
 		//TODO: what about panning?
@@ -253,8 +266,8 @@ s.waitForBoot({
 
 		//distortion, reverb, DC blocker, and limiter
 		Pdef(\distverb,Pmono(\fx_distverbhyg26,\inBus,~mbus,\out,0,
-			\target,~effects2,\addAction,\addToTail,\verbtime,0.7,\verbmix,0.7,
-			\dur,5,\verbdamp,0.2,\verbdiff,0.5,\distmix,0.8,
+			\target,~effects2,\addAction,\addToTail,\verbtime,0.7,
+			\verbmix,0.7,\dur,5,\verbdamp,0.2,\verbdiff,0.5,\distmix,0.8,
 			\distamp,Pfunc{~params.at(\dist)},
 			\verbfreeze,Place(#[0,0,0,0,[0,0,1,0],[0,1,0,1],[1,0,1,1],[0,1,1,0]],inf)
 		)).play;

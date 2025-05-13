@@ -44,7 +44,8 @@ SynthDef(\fx_distverbhyg26,{
 	input=XFade2.ar(input,dist,2*distmix-1);
 	//reverb with dry/wet built-in
 	input=MiVerb.ar(HPF.ar(input,500),verbtime,verbmix,verbdamp,0.05,verbfreeze,verbdiff);
-
+	input=MiVerb.ar(input,time: 0.6, drywet: 1.0,
+		damp: 0.8, diff: 0.4);
 	//hygiene
 	input=LeakDC.ar(input,0.999); //DC block
 	input=Limiter.ar(input,1,0.0005); //super responsive limiter
